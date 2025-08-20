@@ -1,51 +1,69 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import PdfUpload from "../components/PdfUpload";
 
-// 👇 Use pdfjs from pdfjs-dist, not react-pdf
-import { GlobalWorkerOptions } from "pdfjs-dist";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup
+} from "../components/ui/resizable";
 
-// Fix worker issue
-GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
+// use react-pdf for rendering
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+import ChatPanel from "../components/ChatPanel";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function Home() {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
-  const [pdfPages, setPdfPages] = useState<
-    { id: number; canvas: HTMLCanvasElement }[]
-  >([]);
+
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="bg-gray-100 h-screen">
       {!fileUrl ? (
-        <PdfUpload
-          setFileUrl={setFileUrl}
-          pdfPages={pdfPages}
-          setPdfPages={setPdfPages}
-        />
+        <PdfUpload setFileUrl={setFileUrl} />
       ) : (
-        // Simple viewer: display rendered pages as images
-        <div className="min-h-screen flex items-start justify-center p-6">
-          <div className="w-full max-w-4xl bg-white rounded-lg shadow p-4">
-            {pdfPages.length > 0 ? (
-              pdfPages.map((page) => (
-                <div key={page.id} className="mb-4">
-                  <img
-                    src={page.canvas.toDataURL()}
-                    alt={`Page ${page.id}`}
-                    className="w-full h-auto rounded"
-                  />
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-600">
-                No preview available for this PDF.
-              </p>
-            )}
-          </div>
-        </div>
+        <ResizablePanelGroup direction="horizontal">
+          <ResizablePanel minSize={20}>
+            <ChatPanel fileUrl={fileUrl} setFileUrl={setFileUrl} />
+          </ResizablePanel>
+          <ResizableHandle withHandle />
+          <ResizablePanel minSize={20}>
+            <div
+              className="h-screen overflow-y-scroll flex flex-col items-center py-4"
+              ref={containerRef}>
+              <Document
+                file={fileUrl}
+                scale={1}
+                onLoadSuccess={(pdf) => setNumPages(pdf.numPages)}
+                loading={<div className="text-center p-8">Loading PDF…</div>}
+                error={
+                  <div className="text-center text-red-500">
+                    Failed to load PDF
+                  </div>
+                }>
+                {Array.from(new Array(numPages ?? 0), (_el, index) => (
+                  <div key={`page_${index + 1}`} className="mb-4">
+                    <Page
+                      pageNumber={index + 1}
+                      className={"w-fit h-fit overflow-hidden shadow-lg"}
+                      renderTextLayer={true}
+                      scale={1}
+                      renderAnnotationLayer={true}
+                      loading={
+                        <div className="text-center p-4">Rendering page…</div>
+                      }
+                    />
+                  </div>
+                ))}
+              </Document>
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       )}
     </div>
   );

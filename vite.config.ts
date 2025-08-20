@@ -7,5 +7,14 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
     include: ["pdfjs-dist/build/pdf.worker.min.mjs"]
+  },
+  resolve: {
+    alias: {
+      components: "/src/components",
+      utils: "/src/lib/utils",
+      ui: "/src/components/ui",
+      lib: "/src/lib",
+      hooks: "/src/hooks"
+    }
   }
 });
