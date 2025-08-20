@@ -1,6 +1,7 @@
 import axios from "axios";
-import { CircleAlert, FileText, Send, X } from "lucide-react";
+import { Bot, CircleAlert, FileText, Send, User, X } from "lucide-react";
 import { useState } from "react";
+import { cn } from "../lib/utils";
 import {
   Dialog,
   DialogClose,
@@ -26,13 +27,16 @@ export default function ChatPanel({
   const [question, setQuestion] = useState("");
   const [chatStarted, setChatStarted] = useState(false);
 
-  const handleSend = async () => {
-    if (!uploadedPdf.pdfId || !question) return;
+  const handleSend = async (ques: string) => {
+    if (!uploadedPdf.pdfId || !ques) return;
+    if (!chatStarted) {
+      setChatStarted(true);
+    }
     const res = await axios.post("http://localhost:5000/ask", {
       pdfId: uploadedPdf.pdfId,
-      question
+      question: ques
     });
-    setMessages([...messages, { role: "user", text: question }, res.data]);
+    setMessages([...messages, { role: "user", text: ques }, res.data]);
     setQuestion("");
   };
 
@@ -88,12 +92,32 @@ export default function ChatPanel({
         </HoverCard>
       </div>
 
-      <div className="px-6 py-4 flex-1 items-center">
+      <div className="px-6 py-4 flex-1 items-center overflow-y-auto">
         {chatStarted ? (
-          <div className="overflow-y-auto p-2">
+          <div className="p-2">
             {messages.map((m, i) => (
-              <div key={i} className="mb-2">
-                <b>{m.role === "user" ? "You:" : "AI:"}</b> {m.text || m.answer}
+              <div
+                key={i}
+                className={cn(
+                  "flex mb-2",
+                  i % 2 == 0 ? "justify-end" : "justify-start"
+                )}>
+                <div
+                  className={cn(
+                    "rounded-lg px-4 py-2 max-w-[70%]",
+                    i % 2 == 0 ? "bg-blue-100" : "bg-purple-100"
+                  )}>
+                  <div className="flex items-center gap-2">
+                    {m.text ? (
+                      <User className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                    ) : (
+                      <Bot className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                    )}
+                    <p className="whitespace-pre-wrap break-words">
+                      {m.text || m.answer}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -107,25 +131,24 @@ export default function ChatPanel({
             </div>
             <p>You can now ask questions about your document. For example:</p>
             <button
-              onClick={() => {
-                setQuestion("What is the main topic of this document?");
-                setChatStarted(true);
+              onClick={async () => {
+                await handleSend("What is the main topic of this document?");
               }}
               className="w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-4 py-2 mt-2 cursor-pointer">
               <p>What is the main topic of this document?</p>
             </button>
             <button
-              onClick={() => {
-                setQuestion("Can you summarize the key points?");
-                setChatStarted(true);
+              onClick={async () => {
+                await handleSend("Can you summarize the key points?");
               }}
               className="w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-4 py-2 mt-2 cursor-pointer">
               <p>Can you summarize the key points?</p>
             </button>
             <button
-              onClick={() => {
-                setQuestion("What are the conclusions or recommendations?");
-                setChatStarted(true);
+              onClick={async () => {
+                await handleSend(
+                  "What are the conclusions or recommendations?"
+                );
               }}
               className="w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-4 py-2 mt-2 cursor-pointer">
               <p>What are the conclusions or recommendations?</p>
@@ -142,7 +165,9 @@ export default function ChatPanel({
         />
 
         <button
-          onClick={handleSend}
+          onClick={async () => {
+            await handleSend(question);
+          }}
           className="ml-2 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer">
           <Send className="w-5 h-5" />
         </button>
