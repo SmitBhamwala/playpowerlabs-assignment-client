@@ -13,25 +13,27 @@ import {
 } from "./ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
+interface ChatPanelProps {
+  uploadedPdf: { pdfId: string; fileName: string; fileUrl: string };
+  setUploadedPdf: React.Dispatch<React.SetStateAction<any>>;
+}
+
 export default function ChatPanel({
-  fileUrl,
-  setFileUrl
-}: {
-  fileUrl: string | null;
-  setFileUrl: (url: string | null) => void;
-}) {
+  uploadedPdf,
+  setUploadedPdf
+}: ChatPanelProps) {
   const [messages, setMessages] = useState<any[]>([]);
-  const [input, setInput] = useState("");
+  const [question, setQuestion] = useState("");
   const [chatStarted, setChatStarted] = useState(false);
 
   const handleSend = async () => {
-    if (!fileUrl || !input) return;
-    const res = await axios.post("http://localhost:5000/chat", {
-      fileUrl,
-      question: input
+    if (!uploadedPdf.pdfId || !question) return;
+    const res = await axios.post("http://localhost:5000/ask", {
+      pdfId: uploadedPdf.pdfId,
+      question
     });
-    setMessages([...messages, { role: "user", text: input }, res.data]);
-    setInput("");
+    setMessages([...messages, { role: "user", text: question }, res.data]);
+    setQuestion("");
   };
 
   return (
@@ -76,7 +78,7 @@ export default function ChatPanel({
                 <button
                   className="px-4 py-2 rounded-lg bg-purple-600 text-white cursor-pointer"
                   onClick={() => {
-                    setFileUrl(null);
+                    setUploadedPdf(null);
                   }}>
                   Upload New PDF
                 </button>
@@ -106,7 +108,7 @@ export default function ChatPanel({
             <p>You can now ask questions about your document. For example:</p>
             <button
               onClick={() => {
-                setInput("What is the main topic of this document?");
+                setQuestion("What is the main topic of this document?");
                 setChatStarted(true);
               }}
               className="w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-4 py-2 mt-2 cursor-pointer">
@@ -114,7 +116,7 @@ export default function ChatPanel({
             </button>
             <button
               onClick={() => {
-                setInput("Can you summarize the key points?");
+                setQuestion("Can you summarize the key points?");
                 setChatStarted(true);
               }}
               className="w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-4 py-2 mt-2 cursor-pointer">
@@ -122,7 +124,7 @@ export default function ChatPanel({
             </button>
             <button
               onClick={() => {
-                setInput("What are the conclusions or recommendations?");
+                setQuestion("What are the conclusions or recommendations?");
                 setChatStarted(true);
               }}
               className="w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-4 py-2 mt-2 cursor-pointer">
@@ -133,8 +135,8 @@ export default function ChatPanel({
       </div>
       <div className="p-4 border-t bg-white w-full flex">
         <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
           placeholder="Ask about the document..."
           className="border py-2 px-4 w-max bg-gray-100 flex-1 rounded-lg"
         />

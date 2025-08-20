@@ -1,11 +1,12 @@
+import axios from "axios";
 import { Upload } from "lucide-react";
 import { useState, type ChangeEvent, type DragEvent } from "react";
 
-export default function PdfUpload({
-  setFileUrl
-}: {
-  setFileUrl: (url: string | null) => void;
-}) {
+interface PdfUploadProps {
+  setUploadedPdf: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -25,22 +26,30 @@ export default function PdfUpload({
     }
   };
 
-  const startUpload = (file: File) => {
+  const startUpload = async (file: File) => {
     setUploading(true);
     setProgress(0);
 
-    const interval = setInterval(() => {
-      setProgress((p) => {
-        const next = Math.min(100, p + 15);
-        if (next >= 100) {
-          clearInterval(interval);
-          setUploading(false);
-          setFileUrl(URL.createObjectURL(file));
-        }
+    const formData = new FormData();
+    formData.append("pdf", file);
 
-        return next;
+    try {
+      const res = await axios.post("http://localhost:5000/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (e) => {
+          if (e.total) {
+            setProgress(Math.round((e.loaded * 100) / e.total));
+          }
+        }
       });
-    }, 250);
+
+      setUploadedPdf(res.data);
+    } catch (err) {
+      console.error("Upload failed", err);
+      setUploadedPdf(null);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (

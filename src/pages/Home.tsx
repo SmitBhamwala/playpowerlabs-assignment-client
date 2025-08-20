@@ -16,20 +16,29 @@ import ChatPanel from "../components/ChatPanel";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
+type UploadedPdf = {
+  pdfId: string;
+  fileName: string;
+  fileUrl: string;
+};
+
 export default function Home() {
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [uploadedPdf, setUploadedPdf] = useState<UploadedPdf | null>(null);
 
   const [numPages, setNumPages] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div className="bg-gray-100 h-screen">
-      {!fileUrl ? (
-        <PdfUpload setFileUrl={setFileUrl} />
+      {!uploadedPdf ? (
+        <PdfUpload setUploadedPdf={setUploadedPdf} />
       ) : (
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel minSize={20}>
-            <ChatPanel fileUrl={fileUrl} setFileUrl={setFileUrl} />
+            <ChatPanel
+              uploadedPdf={uploadedPdf}
+              setUploadedPdf={setUploadedPdf}
+            />
           </ResizablePanel>
           <ResizableHandle withHandle />
           <ResizablePanel minSize={20}>
@@ -37,7 +46,7 @@ export default function Home() {
               className="h-screen overflow-y-scroll flex flex-col items-center py-4"
               ref={containerRef}>
               <Document
-                file={fileUrl}
+                file={uploadedPdf.fileUrl}
                 scale={1}
                 onLoadSuccess={(pdf) => setNumPages(pdf.numPages)}
                 loading={<div className="text-center p-8">Loading PDF…</div>}
