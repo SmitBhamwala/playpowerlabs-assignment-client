@@ -43,9 +43,9 @@ export default function ChatPanel({
           <Dialog>
             <DialogTrigger>
               <HoverCardTrigger>
-                <button className="flex text-right bg-white rounded-full shadow-lg p-2 cursor-pointer">
+                <div className="flex text-right bg-white rounded-full shadow-lg p-2 cursor-pointer">
                   <X />
-                </button>
+                </div>
               </HoverCardTrigger>
               <HoverCardContent
                 side="left"
