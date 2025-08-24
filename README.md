@@ -8,6 +8,21 @@ A React + TypeScript + Vite frontend that lets users upload a PDF and chat with 
 - No .env or VITE\_\* variables required for local usage of the frontend.
 - Backend API: If your deployment uses a backend, configure it separately; for local UI work the upload flow should work against the integrated backend if present.
 
+## Live demo
+
+The frontend is deployed and accessible here:
+https://playpowerlabs-assignment.vercel.app/
+
+You can open the URL, upload a PDF, and start chatting immediately — no local environment variables are required.
+
+## Deploying to Vercel
+
+To deploy the app to Vercel:
+
+- Connect the repository to Vercel and enable automatic deployments.
+- Ensure the build command is `npm run build` (or `yarn build`) and the output directory is `dist`.
+- No `.env` is required for the frontend; the upload/chat UI works out of the box. If your production setup requires a backend, configure any backend endpoints separately in that deployment environment.
+
 ## Prerequisites
 
 - Node.js 16+ (LTS recommended)
