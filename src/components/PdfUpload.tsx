@@ -2,8 +2,14 @@ import axios from "axios";
 import { Upload } from "lucide-react";
 import { useState, type ChangeEvent, type DragEvent } from "react";
 
+// exported type so other modules (eg. Home.tsx) can import
+export type UploadedPdf = {
+  pdfId: string;
+  fileUrl: string;
+};
+
 interface PdfUploadProps {
-  setUploadedPdf: React.Dispatch<React.SetStateAction<any>>;
+  setUploadedPdf: React.Dispatch<React.SetStateAction<UploadedPdf | null>>;
 }
 
 export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
@@ -44,9 +50,10 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
         }
       });
 
-      setUploadedPdf(res.data);
+      // assume backend returns { pdfId, fileUrl } — narrow the type for TS
+      setUploadedPdf(res.data as UploadedPdf);
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : String(err));
       setUploadedPdf(null);
     } finally {
       setUploading(false);

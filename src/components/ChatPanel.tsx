@@ -3,6 +3,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "../lib/utils";
+import type { UploadedPdf } from "./PdfUpload";
 import TypingDots from "./TypingDots";
 import {
   Dialog,
@@ -17,17 +18,24 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 interface ChatPanelProps {
-  uploadedPdf: { pdfId: string; fileUrl: string };
-  setUploadedPdf: React.Dispatch<React.SetStateAction<any>>;
+  uploadedPdf: UploadedPdf;
+  setUploadedPdf: React.Dispatch<React.SetStateAction<UploadedPdf | null>>;
   onScrollToPage?: (pageNum: number) => void;
 }
+
+type ChatMessage = {
+  role: "user" | "bot";
+  text?: string;
+  answer?: string;
+  citations?: number[];
+};
 
 export default function ChatPanel({
   uploadedPdf,
   setUploadedPdf,
   onScrollToPage
 }: ChatPanelProps) {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [question, setQuestion] = useState("");
   const [chatStarted, setChatStarted] = useState(false);
 
@@ -171,10 +179,10 @@ export default function ChatPanel({
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
-                            ul: ({ node, ...props }) => (
+                            ul: (props) => (
                               <ul className="list-disc pl-5" {...props} />
                             ),
-                            ol: ({ node, ...props }) => (
+                            ol: (props) => (
                               <ol className="list-decimal pl-5" {...props} />
                             )
                           }}>

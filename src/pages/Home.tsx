@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import PdfUpload from "../components/PdfUpload";
+import PdfUpload, { type UploadedPdf } from "../components/PdfUpload";
 
 import {
   ResizableHandle,
@@ -15,11 +15,6 @@ import "react-pdf/dist/Page/TextLayer.css";
 import ChatPanel from "../components/ChatPanel";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-
-type UploadedPdf = {
-  pdfId: string;
-  fileUrl: string;
-};
 
 export default function Home() {
   const [uploadedPdf, setUploadedPdf] = useState<UploadedPdf | null>(null);
