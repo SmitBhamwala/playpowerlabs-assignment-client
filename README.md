@@ -1,66 +1,59 @@
-# NotebookLM Clone — Client
+# NotebookLM Clone — Client (PDF Chat)
 
-A React + TypeScript + Vite client for the NotebookLM-style project.
+A React + TypeScript + Vite frontend that lets users upload a PDF and chat with its contents. No environment file is required — upload a PDF and the app will process it and enable a chat interface on successful upload.
 
-This document shows how to install, configure, run, build, and troubleshoot the client locally.
+## Quick summary
+
+- Purpose: Upload a PDF and ask questions about its contents via a chat UI.
+- No .env or VITE\_\* variables required for local usage of the frontend.
+- Backend API: If your deployment uses a backend, configure it separately; for local UI work the upload flow should work against the integrated backend if present.
 
 ## Prerequisites
 
 - Node.js 16+ (LTS recommended)
-- npm 8+ or Yarn 1/2+
-- A backend API (local or remote) that the client will call (optional for static UI work)
+- npm 8+ (or yarn)
+- Modern browser (Chrome, Edge, Firefox)
 
 ## Installation
 
-1. Clone the repo:
+1. Clone the repository:
 
    - git clone <repo-url>
    - cd notebookLM-clone-client
 
 2. Install dependencies:
-
    - npm install
    - or
    - yarn
 
-3. Inspect package.json for available scripts:
-   - cat package.json | grep scripts || open package.json in an editor
+## Run locally (development)
 
-## Environment variables
-
-Vite exposes env variables that start with `VITE_`. Create a `.env` file in the project root for local settings.
-
-Example `.env`:
-
-```
-# .env
-VITE_API_URL=http://localhost:8000
-VITE_APP_TITLE="NotebookLM Clone"
-```
-
-Notes:
-
-- After adding or changing `.env`, restart the dev server.
-- Do not commit secrets or production credentials. Use a separate .env.production for deploys if needed.
-
-## Local development
-
-Start the dev server with HMR:
+Start the Vite dev server:
 
 - npm run dev
 - or
 - yarn dev
 
-Open the URL printed by the dev server (usually http://localhost:5173).
+Open the local URL shown by Vite (commonly http://localhost:5173). No additional configuration or .env file is required.
 
-When developing:
+## Usage — upload a PDF and chat
 
-- Use the browser console and Network tab to inspect API calls.
-- If TypeScript types change, your editor may need to re-index; restarting the dev server can help.
+1. Open the app in your browser.
+2. Click the "Upload PDF" button (or drag-and-drop) and choose a PDF file.
+   - Supported formats: PDF
+   - Recommended file size: up to ~20–50 MB (depends on backend and browser memory)
+3. Wait for the upload and processing to complete. The UI should show an upload progress indicator and a confirmation on success.
+4. After successful upload, a chat input appears. Type questions about the PDF (e.g., "Summarize page 3", "What are the main findings?") and submit.
+5. The app will display responses extracted from the uploaded PDF. Use follow-up questions as needed.
 
-## Build for production
+Notes:
 
-Create an optimized production build:
+- If the app integrates with a remote backend for parsing or embeddings, network errors will appear in the UI; see troubleshooting below.
+- For large PDFs or many pages, processing can take longer — be patient and check for progress indications.
+
+## Build & preview
+
+Create a production build:
 
 - npm run build
 - or
@@ -72,57 +65,36 @@ Preview the production build locally:
 - or
 - yarn preview
 
-Deploy the contents of the `dist` directory to your static host (Netlify, Vercel, S3, etc.) or serve them from your backend.
+Deploy the contents of the `dist` folder to your chosen static host or serve them via your backend.
 
-## Common scripts (check package.json)
+## Common scripts
 
-Typical scripts you may have or add:
+Check package.json for available scripts. Typical ones:
 
 - dev — start Vite dev server
-- build — create production build
-- preview — locally preview build
-- lint — run ESLint
+- build — production build
+- preview — preview build
+- lint — run ESLint (if present)
 - format — run Prettier
-- test — run unit tests
+- test — run tests
 
-Example:
+Run e.g.:
 
 - npm run lint
-- npm run format
 - npm run test
-
-If a script is missing, add it to package.json or run the corresponding CLI directly.
-
-## Type checking & linting
-
-- Run TypeScript checks with: npx tsc --noEmit (or an npm script)
-- Run ESLint (if configured): npm run lint
-
-Adjust tsconfig and ESLint settings to enable type-aware rules when needed.
-
-## Docker (optional)
-
-Simple Dockerfile approach:
-
-1. Build
-   - docker build -t notebooklm-client .
-2. Run
-   - docker run -p 4173:4173 notebooklm-client
-
-(Adjust Dockerfile and ports to match your production setup.)
 
 ## Troubleshooting
 
-- Blank page / runtime errors: check browser console for missing env vars or misconfigured API URLs.
-- HMR not updating: restart dev server, clear browser cache, or delete node_modules + reinstall.
-- Type errors on CI: ensure CI runs `npm ci` and `npx tsc --noEmit` if you enforce type checks.
+- Upload fails / network error: Check browser console and network tab. Ensure any required backend is running if the app depends on it.
+- No chat after upload: Verify the upload completed successfully and the app returned a success response. Reload and try again with a smaller PDF if needed.
+- Large PDFs cause performance issues: Try splitting the PDF or reduce size/resolution before upload.
+- Blank page / runtime errors: open the console, then restart the dev server and try again.
 
 ## Contributing
 
-- Fork the repo, create a branch, open a PR with a clear description.
-- Keep commits small and focused. Add tests for new features where applicable.
+- Fork, branch, implement changes, open a PR with a clear description.
+- Add tests for new features where applicable.
 
-## License & Contact
+## License
 
-- Add your project license here (e.g., MIT).
-- For questions, open an issue in the repository.
+Add the project license here (e.g., MIT). For questions, open an issue in the repository.
