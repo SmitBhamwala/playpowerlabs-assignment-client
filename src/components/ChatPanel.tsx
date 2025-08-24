@@ -32,6 +32,9 @@ export default function ChatPanel({
       setChatStarted(true);
     }
 
+    setMessages((messages) => [...messages, { role: "user", text: ques }]);
+    setQuestion("");
+
     const res = await fetch("http://localhost:5000/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -40,35 +43,38 @@ export default function ChatPanel({
 
     const reader = res.body!.getReader();
     const decoder = new TextDecoder();
-    let text = "";
-
-    setMessages((messages) => [...messages, { role: "user", text: ques }]);
 
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
 
-      const chunk = decoder.decode(value);
-      // SSE chunks start with "data: ..."
-      const cleanChunk = chunk
-        .split("\n")
-        .filter((line) => line.startsWith("data:"))
-        .map((line) => line.replace(/^data:\s*/, " ")) // remove "data: "
-        .join("");
+      const decoded = decoder.decode(value);
+      const lines = decoded.trim().split("\n");
 
-      text += cleanChunk;
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const parsed = JSON.parse(line.replace("data: ", ""));
+          const { text, citations }: { text: string; citations: number[] } =
+            parsed;
 
-      setMessages((messages) => {
-        const lastMessage = messages[messages.length - 1];
-        if (lastMessage && lastMessage.role === "bot") {
-          return [...messages.slice(0, -1), { role: "bot", answer: text }];
-        } else {
-          return [...messages, { role: "bot", answer: text }];
+          setMessages((messages) => {
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage && lastMessage.role === "bot") {
+              return [
+                ...messages.slice(0, -1),
+                {
+                  role: "bot",
+                  answer: (lastMessage.answer || "") + text,
+                  citations
+                }
+              ];
+            } else {
+              return [...messages, { role: "bot", answer: text, citations }];
+            }
+          });
         }
-      });
+      }
     }
-
-    setQuestion("");
   };
 
   return (
@@ -144,10 +150,19 @@ export default function ChatPanel({
                     ) : (
                       <Bot className="w-5 h-5 text-purple-600 flex-shrink-0" />
                     )}
+
                     <p className="whitespace-pre-wrap break-words">
                       {m.text || m.answer}
                     </p>
                   </div>
+                  {m.citations && m.citations.length > 0 && (
+                    <p className="mt-2 text-sm text-purple-700 bg-purple-300 w-fit px-2 py-1 rounded">
+                      Page:{" "}
+                      {m.citations.map((c: number, idx: number) => (
+                        <span key={idx}>{c}</span>
+                      ))}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}
