@@ -18,7 +18,6 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 
 type UploadedPdf = {
   pdfId: string;
-  fileName: string;
   fileUrl: string;
 };
 

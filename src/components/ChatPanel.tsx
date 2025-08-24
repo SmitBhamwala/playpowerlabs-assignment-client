@@ -1,4 +1,3 @@
-import axios from "axios";
 import { Bot, CircleAlert, FileText, Send, User, X } from "lucide-react";
 import { useState } from "react";
 import { cn } from "../lib/utils";
@@ -15,7 +14,7 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 interface ChatPanelProps {
-  uploadedPdf: { pdfId: string; fileName: string; fileUrl: string };
+  uploadedPdf: { pdfId: string; fileUrl: string };
   setUploadedPdf: React.Dispatch<React.SetStateAction<any>>;
 }
 
@@ -32,11 +31,43 @@ export default function ChatPanel({
     if (!chatStarted) {
       setChatStarted(true);
     }
-    const res = await axios.post("http://localhost:5000/ask", {
-      pdfId: uploadedPdf.pdfId,
-      question: ques
+
+    const res = await fetch("http://localhost:5000/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pdfId: uploadedPdf.pdfId, question: ques })
     });
-    setMessages([...messages, { role: "user", text: ques }, res.data]);
+
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let text = "";
+
+    setMessages((messages) => [...messages, { role: "user", text: ques }]);
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      // SSE chunks start with "data: ..."
+      const cleanChunk = chunk
+        .split("\n")
+        .filter((line) => line.startsWith("data:"))
+        .map((line) => line.replace(/^data:\s*/, " ")) // remove "data: "
+        .join("");
+
+      text += cleanChunk;
+
+      setMessages((messages) => {
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage && lastMessage.role === "bot") {
+          return [...messages.slice(0, -1), { role: "bot", answer: text }];
+        } else {
+          return [...messages, { role: "bot", answer: text }];
+        }
+      });
+    }
+
     setQuestion("");
   };
 
