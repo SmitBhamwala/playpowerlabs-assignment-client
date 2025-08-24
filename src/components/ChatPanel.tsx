@@ -21,6 +21,7 @@ interface ChatPanelProps {
   uploadedPdf: UploadedPdf;
   setUploadedPdf: React.Dispatch<React.SetStateAction<UploadedPdf | null>>;
   onScrollToPage?: (pageNum: number) => void;
+  onOpenPdf?: () => void;
 }
 
 type ChatMessage = {
@@ -33,7 +34,8 @@ type ChatMessage = {
 export default function ChatPanel({
   uploadedPdf,
   setUploadedPdf,
-  onScrollToPage
+  onScrollToPage,
+  onOpenPdf
 }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [question, setQuestion] = useState("");
@@ -52,7 +54,7 @@ export default function ChatPanel({
       { role: "bot", answer: "", citations: [] }
     ]);
 
-    const res = await fetch("https://playpowerlabs-assignment-server.onrender.com/ask", {
+    const res = await fetch("http://localhost:5001/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pdfId: uploadedPdf.pdfId, question: ques })
@@ -96,7 +98,15 @@ export default function ChatPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex justify-end mt-4 mr-4">
+      <div className="flex justify-end mt-4 mr-4 px-4 sm:px-0 items-center space-x-2">
+        <div>
+          <button
+            onClick={() => onOpenPdf && onOpenPdf()}
+            aria-label="Open PDF"
+            className="bg-white visible lg:hidden rounded-full shadow-lg p-2 cursor-pointer inline-flex items-center justify-center">
+            <FileText className="w-5 h-5 text-purple-600" />
+          </button>
+        </div>
         <HoverCard openDelay={100} closeDelay={100}>
           <Dialog>
             <DialogTrigger>
@@ -111,7 +121,7 @@ export default function ChatPanel({
                 <h3 className="text-lg font-semibold">Upload New PDF?</h3>
               </HoverCardContent>
             </DialogTrigger>
-            <DialogContent className="w-[28rem]">
+            <DialogContent className="w-full max-w-md">
               <DialogHeader>
                 <DialogTitle>
                   <div className="flex items-center gap-3 mb-2">
@@ -119,11 +129,9 @@ export default function ChatPanel({
                     Upload New PDF?
                   </div>
                 </DialogTitle>
-                <DialogDescription>
-                  <p className="text-gray-600 mb-3 text-base">
-                    This will end your current chat session. Are you sure you
-                    want to upload a new PDF?
-                  </p>
+                <DialogDescription className="text-gray-600 mb-3 text-base">
+                  This will end your current chat session. Are you sure you want
+                  to upload a new PDF?
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
@@ -146,7 +154,7 @@ export default function ChatPanel({
         </HoverCard>
       </div>
 
-      <div className="px-6 py-4 flex-1 items-center overflow-y-auto">
+      <div className="px-4 sm:px-6 py-4 flex-1 items-center overflow-y-auto">
         {chatStarted ? (
           <div className="p-2">
             {messages.map((m, i) => (
@@ -158,7 +166,7 @@ export default function ChatPanel({
                 )}>
                 <div
                   className={cn(
-                    "rounded-lg px-4 py-2 max-w-[70%]",
+                    "rounded-lg px-3 py-2 max-w-[80%] text-sm",
                     i % 2 == 0 ? "bg-blue-100" : "bg-purple-100"
                   )}>
                   <div className="flex gap-2">
@@ -169,13 +177,13 @@ export default function ChatPanel({
                     )}
 
                     {m.text && (
-                      <p className="whitespace-pre-wrap break-words">
+                      <p className="whitespace-pre-wrap break-words text-sm">
                         {m.text}
                       </p>
                     )}
 
                     {m.answer && (
-                      <div className="whitespace-pre-wrap break-words">
+                      <div className="whitespace-pre-wrap break-words text-sm">
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
@@ -201,7 +209,7 @@ export default function ChatPanel({
                       m.citations.length > 0 &&
                       m.citations.map((page: number, idx: number) => (
                         <p
-                          className="w-fit px-2 py-1 rounded text-purple-700 bg-purple-300 cursor-pointer"
+                          className="w-fit px-2 py-1 rounded text-purple-700 bg-purple-300 cursor-pointer text-xs"
                           onClick={() => {
                             if (onScrollToPage) onScrollToPage(page);
                           }}
@@ -222,19 +230,21 @@ export default function ChatPanel({
                 Your document is ready!
               </h3>
             </div>
-            <p>You can now ask questions about your document. For example:</p>
+            <p className="text-sm">
+              You can now ask questions about your document. For example:
+            </p>
             <button
               onClick={async () => {
                 await handleSend("What is the main topic of this document?");
               }}
-              className="w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-4 py-2 mt-2 cursor-pointer">
+              className="w-full text-left sm:w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-3 py-2 mt-2 cursor-pointer text-sm">
               <p>What is the main topic of this document?</p>
             </button>
             <button
               onClick={async () => {
                 await handleSend("Can you summarize the key points?");
               }}
-              className="w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-4 py-2 mt-2 cursor-pointer">
+              className="w-full text-left sm:w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-3 py-2 mt-2 cursor-pointer text-sm">
               <p>Can you summarize the key points?</p>
             </button>
             <button
@@ -243,26 +253,35 @@ export default function ChatPanel({
                   "What are the conclusions or recommendations?"
                 );
               }}
-              className="w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-4 py-2 mt-2 cursor-pointer">
+              className="w-full text-left sm:w-fit bg-[#efe1ff] hover:bg-[#ecdbff] rounded-lg px-3 py-2 mt-2 cursor-pointer text-sm">
               <p>What are the conclusions or recommendations?</p>
             </button>
           </div>
         )}
       </div>
-      <div className="p-4 border-t bg-white w-full flex">
+      <div className="p-3 border-t bg-white w-full flex flex-col sm:flex-row gap-2">
         <input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (question.trim()) {
+                void handleSend(question);
+              }
+            }
+          }}
           placeholder="Ask about the document..."
-          className="border py-2 px-4 w-max bg-gray-100 flex-1 rounded-lg"
+          className="border py-2 px-3 w-full bg-gray-100 flex-1 rounded-lg text-sm"
         />
 
         <button
           onClick={async () => {
             await handleSend(question);
           }}
-          className="ml-2 bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer">
-          <Send className="w-5 h-5" />
+          className="ml-2 bg-purple-600 text-white py-2 px-3 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer flex items-center justify-center"
+          aria-label="Send question">
+          <Send className="w-4 h-4" />
         </button>
       </div>
     </div>

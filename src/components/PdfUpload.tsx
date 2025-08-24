@@ -41,7 +41,7 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
     formData.append("pdf", file);
 
     try {
-      const res = await axios.post("https://playpowerlabs-assignment-server.onrender.com/upload", formData, {
+      const res = await axios.post("http://localhost:5001/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (e) => {
           if (e.total) {
@@ -62,7 +62,7 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
 
   return (
     <div
-      className="h-screen flex items-center justify-center"
+      className="h-screen flex items-center justify-center px-4 bg-gray-50"
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
       onDragEnter={() => setIsDragging(true)}
@@ -70,7 +70,7 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
       {!uploading ? (
         <label
           htmlFor="fileUpload"
-          className={`relative flex flex-col items-center gap-6 p-12 bg-white rounded-xl shadow-lg cursor-pointer hover:bg-gray-50 transition-colors 
+          className={`relative flex flex-col items-center gap-6 p-8 sm:p-12 bg-white rounded-xl shadow-lg cursor-pointer hover:bg-gray-50 transition-colors w-full max-w-md mx-auto
             ${isDragging ? "border-2 border-dashed border-purple-500" : ""}`}>
           <input
             type="file"
@@ -93,7 +93,7 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </label>
       ) : (
-        <div className="w-full max-w-2xl p-6 bg-white rounded-xl shadow-lg">
+        <div className="w-full max-w-md sm:max-w-2xl p-4 sm:p-6 bg-white rounded-xl shadow-lg mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div
