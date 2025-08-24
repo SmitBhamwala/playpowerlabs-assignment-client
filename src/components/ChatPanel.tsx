@@ -1,5 +1,7 @@
 import { Bot, CircleAlert, FileText, Send, User, X } from "lucide-react";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { cn } from "../lib/utils";
 import {
   Dialog,
@@ -144,25 +146,50 @@ export default function ChatPanel({
                     "rounded-lg px-4 py-2 max-w-[70%]",
                     i % 2 == 0 ? "bg-blue-100" : "bg-purple-100"
                   )}>
-                  <div className="flex items-center gap-2">
+                  <div className="flex gap-2">
                     {m.text ? (
-                      <User className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                      <User className="w-5 h-5 mt-[2px] text-blue-600 flex-shrink-0" />
                     ) : (
-                      <Bot className="w-5 h-5 text-purple-600 flex-shrink-0" />
+                      <Bot className="w-5 h-5 mt-[2px] text-purple-600 flex-shrink-0" />
                     )}
 
-                    <p className="whitespace-pre-wrap break-words">
-                      {m.text || m.answer}
-                    </p>
+                    {m.text && (
+                      <p className="whitespace-pre-wrap break-words">
+                        {m.text}
+                      </p>
+                    )}
+
+                    {m.answer && (
+                      <div className="whitespace-pre-wrap break-words">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            ul: ({ node, ...props }) => (
+                              <ul className="list-disc pl-5" {...props} />
+                            ),
+                            ol: ({ node, ...props }) => (
+                              <ol className="list-decimal pl-5" {...props} />
+                            )
+                          }}>
+                          {m.answer}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                   </div>
-                  {m.citations && m.citations.length > 0 && (
-                    <p className="mt-2 text-sm text-purple-700 bg-purple-300 w-fit px-2 py-1 rounded">
-                      Page:{" "}
-                      {m.citations.map((c: number, idx: number) => (
-                        <span key={idx}>{c}</span>
+                  <div className="flex gap-2 mt-2 text-sm">
+                    {m.citations &&
+                      m.citations.length > 0 &&
+                      m.citations.map((c: number, idx: number) => (
+                        <p
+                          className="w-fit px-2 py-1 rounded text-purple-700 bg-purple-300 cursor-pointer"
+                          onClick={() => {
+                            // Scroll to the page in the PDF viewer
+                          }}
+                          key={idx}>
+                          Page: {c}
+                        </p>
                       ))}
-                    </p>
-                  )}
+                  </div>
                 </div>
               </div>
             ))}
