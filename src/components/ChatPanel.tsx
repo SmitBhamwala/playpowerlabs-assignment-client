@@ -3,6 +3,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "../lib/utils";
+import TypingDots from "./TypingDots";
 import {
   Dialog,
   DialogClose,
@@ -18,11 +19,13 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 interface ChatPanelProps {
   uploadedPdf: { pdfId: string; fileUrl: string };
   setUploadedPdf: React.Dispatch<React.SetStateAction<any>>;
+  onScrollToPage?: (pageNum: number) => void;
 }
 
 export default function ChatPanel({
   uploadedPdf,
-  setUploadedPdf
+  setUploadedPdf,
+  onScrollToPage
 }: ChatPanelProps) {
   const [messages, setMessages] = useState<any[]>([]);
   const [question, setQuestion] = useState("");
@@ -36,6 +39,10 @@ export default function ChatPanel({
 
     setMessages((messages) => [...messages, { role: "user", text: ques }]);
     setQuestion("");
+    setMessages((messages) => [
+      ...messages,
+      { role: "bot", answer: "", citations: [] }
+    ]);
 
     const res = await fetch("http://localhost:5000/ask", {
       method: "POST",
@@ -175,18 +182,23 @@ export default function ChatPanel({
                         </ReactMarkdown>
                       </div>
                     )}
+                    {!m.answer && m.role === "bot" && (
+                      <div className="whitespace-pre-wrap break-words">
+                        <TypingDots />
+                      </div>
+                    )}
                   </div>
                   <div className="flex gap-2 mt-2 text-sm">
                     {m.citations &&
                       m.citations.length > 0 &&
-                      m.citations.map((c: number, idx: number) => (
+                      m.citations.map((page: number, idx: number) => (
                         <p
                           className="w-fit px-2 py-1 rounded text-purple-700 bg-purple-300 cursor-pointer"
                           onClick={() => {
-                            // Scroll to the page in the PDF viewer
+                            if (onScrollToPage) onScrollToPage(page);
                           }}
                           key={idx}>
-                          Page: {c}
+                          Page: {page}
                         </p>
                       ))}
                   </div>

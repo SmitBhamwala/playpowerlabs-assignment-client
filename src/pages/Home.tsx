@@ -27,6 +27,17 @@ export default function Home() {
   const [numPages, setNumPages] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
+  const scrollToPage = (pageNum: number) => {
+    const el = document.getElementById(`pdf-page-${pageNum}`);
+    if (!el || !containerRef.current) return;
+
+    const container = containerRef.current;
+    const target = el as HTMLElement;
+
+    const offsetTop = target.offsetTop - container.offsetTop;
+    container.scrollTo({ top: offsetTop, behavior: "smooth" });
+  };
+
   return (
     <div className="bg-gray-100 h-screen">
       {!uploadedPdf ? (
@@ -37,6 +48,7 @@ export default function Home() {
             <ChatPanel
               uploadedPdf={uploadedPdf}
               setUploadedPdf={setUploadedPdf}
+              onScrollToPage={scrollToPage}
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
@@ -55,7 +67,10 @@ export default function Home() {
                   </div>
                 }>
                 {Array.from(new Array(numPages ?? 0), (_el, index) => (
-                  <div key={`page_${index + 1}`} className="mb-4">
+                  <div
+                    id={`pdf-page-${index + 1}`}
+                    key={`page_${index + 1}`}
+                    className="mb-4">
                     <Page
                       pageNumber={index + 1}
                       className={"w-fit h-fit overflow-hidden shadow-lg"}

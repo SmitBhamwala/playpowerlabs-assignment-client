@@ -10,6 +10,7 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -45,7 +46,7 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
 
       setUploadedPdf(res.data);
     } catch (err) {
-      console.error("Upload failed", err);
+      setError(err.message);
       setUploadedPdf(null);
     } finally {
       setUploading(false);
@@ -82,13 +83,22 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
               Click or drag and drop your file here
             </p>
           </div>
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
         </label>
       ) : (
         <div className="w-full max-w-2xl p-6 bg-white rounded-xl shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full border-4 border-purple-300 animate-spin" />
-              <div className="text-purple-600 font-medium">Uploading PDF</div>
+              <div
+                className="w-6 h-6 rounded-full border-4 border-purple-300 border-t-transparent animate-spin"
+                aria-hidden="true"
+              />
+              <span className="sr-only">Uploading</span>
+              <div className="text-purple-600 font-medium">
+                {progress < 100
+                  ? "Uploading PDF"
+                  : "Parsing and processing the PDF"}
+              </div>
             </div>
             <div className="text-purple-600 font-medium">{progress}%</div>
           </div>
