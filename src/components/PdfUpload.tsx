@@ -41,7 +41,7 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
     formData.append("pdf", file);
 
     try {
-      const res = await axios.post("http://localhost:5001/upload", formData, {
+      const res = await axios.post("https://playpowerlabs-assignment-server.onrender.com/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (e) => {
           if (e.total) {

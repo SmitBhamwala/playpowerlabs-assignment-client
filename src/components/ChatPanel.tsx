@@ -1,5 +1,5 @@
 import { Bot, CircleAlert, FileText, Send, User, X } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "../lib/utils";
@@ -40,6 +40,15 @@ export default function ChatPanel({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [question, setQuestion] = useState("");
   const [chatStarted, setChatStarted] = useState(false);
+  // ref to the scrollable messages container so we can auto-scroll
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    const c = messagesContainerRef.current;
+    if (!c) return;
+    // Use scrollTo with scrollHeight to ensure we reach the bottom
+    c.scrollTo({ top: c.scrollHeight, behavior });
+  };
 
   const handleSend = async (ques: string) => {
     if (!uploadedPdf.pdfId || !ques) return;
@@ -49,12 +58,15 @@ export default function ChatPanel({
 
     setMessages((messages) => [...messages, { role: "user", text: ques }]);
     setQuestion("");
+    // add an initial bot placeholder message that will be updated as the stream arrives
     setMessages((messages) => [
       ...messages,
       { role: "bot", answer: "", citations: [] }
     ]);
+    // ensure we scroll to bottom after adding the messages (schedule after render)
+    setTimeout(() => scrollToBottom("smooth"), 0);
 
-    const res = await fetch("http://localhost:5001/ask", {
+    const res = await fetch("https://playpowerlabs-assignment-server.onrender.com/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pdfId: uploadedPdf.pdfId, question: ques })
@@ -91,6 +103,9 @@ export default function ChatPanel({
               return [...messages, { role: "bot", answer: text, citations }];
             }
           });
+          // schedule a scroll after the DOM updates with the new streamed chunk
+          // use requestAnimationFrame for a smoother update
+          requestAnimationFrame(() => scrollToBottom("smooth"));
         }
       }
     }
@@ -154,7 +169,9 @@ export default function ChatPanel({
         </HoverCard>
       </div>
 
-      <div className="px-4 sm:px-6 py-4 flex-1 items-center overflow-y-auto">
+      <div
+        ref={messagesContainerRef}
+        className="px-4 sm:px-6 py-4 flex-1 items-center overflow-y-auto">
         {chatStarted ? (
           <div className="p-2">
             {messages.map((m, i) => (
