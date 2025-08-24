@@ -52,7 +52,7 @@ export default function ChatPanel({
       { role: "bot", answer: "", citations: [] }
     ]);
 
-    const res = await fetch("http://localhost:5000/ask", {
+    const res = await fetch("https://playpowerlabs-assignment-server.onrender.com/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pdfId: uploadedPdf.pdfId, question: ques })
