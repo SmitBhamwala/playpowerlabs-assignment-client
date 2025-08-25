@@ -67,7 +67,7 @@ export default function ChatPanel({
     setTimeout(() => scrollToBottom("smooth"), 0);
 
     const res = await fetch(
-      "https://0c5w5gsod3.execute-api.ap-south-1.amazonaws.com/demo/ask",
+      "https://playpowerlabs-assignment-server.onrender.com/ask",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

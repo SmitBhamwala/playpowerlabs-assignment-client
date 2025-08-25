@@ -42,7 +42,7 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
 
     try {
       const res = await axios.post(
-        "https://0c5w5gsod3.execute-api.ap-south-1.amazonaws.com/demo/upload",
+        "https://playpowerlabs-assignment-server.onrender.com/upload",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -53,6 +53,7 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
           }
         }
       );
+      console.log(res.data);
 
       // assume backend returns { pdfId, fileUrl } — narrow the type for TS
       setUploadedPdf(res.data as UploadedPdf);
