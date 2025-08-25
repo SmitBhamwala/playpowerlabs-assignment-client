@@ -41,14 +41,18 @@ export default function PdfUpload({ setUploadedPdf }: PdfUploadProps) {
     formData.append("pdf", file);
 
     try {
-      const res = await axios.post("https://playpowerlabs-assignment-server.onrender.com/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        onUploadProgress: (e) => {
-          if (e.total) {
-            setProgress(Math.round((e.loaded * 100) / e.total));
+      const res = await axios.post(
+        "https://0c5w5gsod3.execute-api.ap-south-1.amazonaws.com/demo/upload",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (e) => {
+            if (e.total) {
+              setProgress(Math.round((e.loaded * 100) / e.total));
+            }
           }
         }
-      });
+      );
 
       // assume backend returns { pdfId, fileUrl } — narrow the type for TS
       setUploadedPdf(res.data as UploadedPdf);

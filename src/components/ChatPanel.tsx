@@ -66,11 +66,14 @@ export default function ChatPanel({
     // ensure we scroll to bottom after adding the messages (schedule after render)
     setTimeout(() => scrollToBottom("smooth"), 0);
 
-    const res = await fetch("https://playpowerlabs-assignment-server.onrender.com/ask", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ pdfId: uploadedPdf.pdfId, question: ques })
-    });
+    const res = await fetch(
+      "https://0c5w5gsod3.execute-api.ap-south-1.amazonaws.com/demo/ask",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pdfId: uploadedPdf.pdfId, question: ques })
+      }
+    );
 
     const reader = res.body!.getReader();
     const decoder = new TextDecoder();
